@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html ng-app="catApp">
+<head>
+    <meta charset="UTF-8">
+    <title>Cat Microservice UI</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 20px; background-color: #f9f9f9; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; text-align: center; }
+        .cat-list { list-style: none; padding: 0; }
+        .cat-item { padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .cat-item:last-child { border-bottom: none; }
+        .cat-name { font-weight: bold; font-size: 1.1em; }
+        .cat-age { color: #7f8c8d; }
+        .loading, .error { text-align: center; padding: 20px; }
+        .error { color: #e74c3c; }
+    </style>
+    <script>
+        var backendUrl = '__BACKEND_URL__';
+        if (backendUrl === '__BACKEND_URL__') {
+            backendUrl = 'http://localhost:8080'; // Default for local dev if not replaced
+        }
+        
+        var app = angular.module('catApp', []);
+        app.controller('CatController', function($scope, $http) {
+            $scope.cats = [];
+            $scope.loading = true;
+            $scope.error = null;
+
+            var url = backendUrl + '/api/v1/cats';
+            
+            $http.get(url).then(function(response) {
+                $scope.cats = response.data;
+                $scope.loading = false;
+            }, function(error) {
+                $scope.error = "Failed to load cats from " + url;
+                $scope.loading = false;
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="container" ng-controller="CatController">
+        <h1>Cat Microservice UI</h1>
+        
+        <div class="loading" ng-if="loading">Loading cats...</div>
+        <div class="error" ng-if="error">{{error}}</div>
+        
+        <ul class="cat-list" ng-if="!loading && !error">
+            <li class="cat-item" ng-repeat="cat in cats">
+                <span class="cat-name">{{cat.name}}</span>
+                <span class="cat-age">Age: {{cat.age}}</span>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>
